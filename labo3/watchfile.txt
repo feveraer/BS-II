@@ -1,0 +1,5 @@
+/root/c/labo2/test0
+/root/c/labo2/test1
+/root/c/labo2/test2
+/root/c/labo2/test3
+/root/c/labo2/test4
