@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct MappingPid {
+struct process {
   int number;
   int pid;
   int fd_write;
@@ -18,11 +18,10 @@ int main(int argc, char **argv){
     printf("One argument expected!\n");
     exit(1);
   } else {
-    pid_t process_ids[atoi(argv[1])];
     int fd[2];
     int fd_response[2];
     int i;
-    struct MappingPid mappings[atoi(argv[1])];
+    struct process processes[atoi(argv[1])];
     int counter = 0;
 
     for(i=0;i<atoi(argv[1]);i++){
@@ -54,14 +53,14 @@ int main(int argc, char **argv){
         int number=rand();
 
         // Write the random number on the pipe
-        if ((write(fd[1],&number,sizeof(int))!=sizeof(int)) < 0){
+        if (write(fd[1],&number,sizeof(int))!=sizeof(int)){
           perror(argv[0]);
           exit(1);
         }
 
         // Wait on the response
-        struct MappingPid winner;
-        if (read(fd_response[0],&winner,sizeof(struct MappingPid)) != sizeof(struct MappingPid)) {
+        struct process winner;
+        if (read(fd_response[0],&winner,sizeof(struct process)) != sizeof(struct process)) {
           exit(1);
         }
 
@@ -86,14 +85,14 @@ int main(int argc, char **argv){
         read(fd[0],&number, sizeof(int));
         printf("pid=%d value=%d!\n",pid,number);
 
-        struct MappingPid mp;
+        struct process mp;
         mp.number = number;
         mp.pid = pid;
         mp.fd_write=fd_response[1];
 
-        mappings[counter].number = mp.number;
-        mappings[counter].pid = mp.pid;
-        mappings[counter].fd_write = fd_response[1];
+        processes[counter].number = mp.number;
+        processes[counter].pid = mp.pid;
+        processes[counter].fd_write = fd_response[1];
 
         // Increment created children
         counter++;
@@ -101,18 +100,18 @@ int main(int argc, char **argv){
     }
 
     // Find max
-    struct MappingPid max;
-    max= mappings[0];
+    struct process max;
+    max= processes[0];
 
     for (i = 1; i < atoi(argv[1]); i++) {
-      if (mappings[i].number > max.number) {
-        max = mappings[i];
+      if (processes[i].number > max.number) {
+        max = processes[i];
       }
     }
 
     // Found max, send it to the child
     for (i = 0; i < atoi(argv[1]); i++) {
-      if ((write(mappings[i].fd_write,&max,sizeof(struct MappingPid)) != sizeof(struct MappingPid)) < 0) {
+      if (write(processes[i].fd_write,&max,sizeof(struct process)) != sizeof(struct process)) {
         perror(argv[0]);
         exit(0);
       }
