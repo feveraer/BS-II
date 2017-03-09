@@ -101,7 +101,7 @@ int main(int argc, char **argv){
 
     // Find max
     struct process max;
-    max= processes[0];
+    max = processes[0];
 
     for (i = 1; i < atoi(argv[1]); i++) {
       if (processes[i].number > max.number) {
