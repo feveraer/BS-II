@@ -5,49 +5,61 @@
 #define N 1000000000
 #define N_THREADS 2
 
-float rand_numbers[N];
 pthread_t tid[N_THREADS];
 
-float smallest() {
+typedef struct args args;
+struct args {
+  int *thread_id;
+  float *tab;
+};
+
+
+float smallest(float *tab) {
   int i;
-  float smallest = rand_numbers[0];
+  float smallest = tab[0];
   for (i = 1; i < N; i++) {
-    if (rand_numbers[i] < smallest) {
-      smallest = rand_numbers[i];
+    if (tab[i] < smallest) {
+      smallest = tab[i];
     }
   }
   return smallest;
 }
 
-float biggest() {
+float biggest(float *tab) {
   int i;
-  float biggest = rand_numbers[0];
+  float biggest = tab[0];
   for (i = 1; i < N; i++) {
-    if (rand_numbers[i] > biggest) {
-      biggest = rand_numbers[i];
+    if (tab[i] > biggest) {
+      biggest = tab[i];
     }
   }
   return biggest;
 }
 
 void *handle_thread(void *arg) {
-  int id = *(int*) arg;
+  struct args *arguments = (struct args*)arg;
 
-  if (id == 0) {
-    printf("Smallest number: %.2f\n", smallest());
+  if (arguments->thread_id == 0) {
+    printf("Smallest number: %.2f\n", smallest(arguments->tab));
   } else {
-    printf("Biggest number: %.2f\n", biggest());
+    printf("Biggest number: %.2f\n", biggest(arguments->tab));
   }
 }
 
 int main(int argc, char** argv) {
+  float *tab = malloc(sizeof(*tab)*N);
+  struct args arguments;
+  arguments.tab = tab;
   srand(time(NULL));
   int i, status;
   for (i = 0; i < N; i++) {
-    rand_numbers[i] = ((float) rand()) / RAND_MAX;
+    tab[i] = ((float) rand()) / RAND_MAX;
   }
   for (i = 0; i < N_THREADS; i++) {
-    status = pthread_create(&tid[i], NULL, &handle_thread, &i);
+    int *thread_id = malloc(sizeof(*thread_id)); 
+    *thread_id = i;
+    arguments.thread_id = thread_id;
+    status = pthread_create(&tid[i], NULL, &handle_thread, (void*)&arguments);
 
     if (status != 0) {
       perror("Can't create thread\n");
@@ -59,5 +71,6 @@ int main(int argc, char** argv) {
     pthread_join(tid[i], NULL);
   }
 
+  free(tab);
   return 0;
 }
