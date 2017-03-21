@@ -8,7 +8,7 @@
 
 pthread_t tid[N_THREADS]; // container for 4 threads
 
-void *handleThread(void *arg) {
+void *handle_thread(void *arg) {
   pthread_t id = pthread_self();
   int i = 0;
   int number = *(int*)arg;
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
   int rand_number = rand() % 100;
 
   for (i = 0; i < N_THREADS; i++) {
-    err = pthread_create(&tid[i], NULL, &handleThread, &rand_number);
+    err = pthread_create(&tid[i], NULL, &handle_thread, &rand_number);
 
     if (err != 0) {
       printf("Can't create thread\n");
