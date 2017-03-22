@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define N 1000000000
+#define N 1000
 #define N_THREADS 2
 
 pthread_t tid[N_THREADS];
@@ -37,29 +37,30 @@ float biggest(float *tab) {
 }
 
 void *handle_thread(void *arg) {
-  struct args *arguments = (struct args*)arg;
+  struct args *arguments = (struct args*) arg;
 
-  if (arguments->thread_id == 0) {
+  printf("thread_id: %d\n", *(arguments->thread_id));
+  if (*(arguments->thread_id) == 0) {
     printf("Smallest number: %.2f\n", smallest(arguments->tab));
   } else {
     printf("Biggest number: %.2f\n", biggest(arguments->tab));
   }
+  // free(arguments->thread_id);
 }
 
 int main(int argc, char** argv) {
   float *tab = malloc(sizeof(*tab)*N);
-  struct args arguments;
-  arguments.tab = tab;
+  struct args *arguments = malloc(sizeof(*arguments));
+  arguments->tab = tab;
   srand(time(NULL));
   int i, status;
   for (i = 0; i < N; i++) {
-    tab[i] = ((float) rand()) / RAND_MAX;
+    tab[i] = ((float) rand()) / (RAND_MAX / N);
   }
   for (i = 0; i < N_THREADS; i++) {
-    int *thread_id = malloc(sizeof(*thread_id)); 
-    *thread_id = i;
-    arguments.thread_id = thread_id;
-    status = pthread_create(&tid[i], NULL, &handle_thread, (void*)&arguments);
+    arguments->thread_id = malloc(sizeof(int));
+    *(arguments->thread_id) = i;
+    status = pthread_create(&tid[i], NULL, &handle_thread, arguments);
 
     if (status != 0) {
       perror("Can't create thread\n");
@@ -72,5 +73,6 @@ int main(int argc, char** argv) {
   }
 
   free(tab);
+  free(arguments);
   return 0;
 }
