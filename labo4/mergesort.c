@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#define N 20
+#define N 100000000
 
 void merge(int *tab, int n) {
   int i, j, nL;
@@ -81,18 +81,23 @@ void fill_tab(int *tab, int n) {
 }
 
 int main(int argc, char** argv) {
-  int tab[N];
-  fill_tab(tab, N);
+  int *tab1 = malloc(sizeof(*tab1) * N);
+  int *tab2 = malloc(sizeof(*tab2) * N);
+  fill_tab(tab1, N);
+  fill_tab(tab2, N);
   // int n = sizeof(tab) / sizeof(*tab);
 
-  printf("Unsorted array: \n");
-  print_tab(tab, N);
+  // printf("Unsorted array: \n");
+  // print_tab(tab1, N);
 
-  sort(tab, N);
+  sort(tab1, N);
+  sort(tab2, N);
 
-  printf("Sorted array: \n");
-  print_tab(tab, N);
+  // printf("Sorted array: \n");
+  // print_tab(tab1, N);
 
+  free(tab1);
+  free(tab2);
   return 0;
 }
 
